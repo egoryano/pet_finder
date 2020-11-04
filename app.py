@@ -399,4 +399,5 @@ for key in values:
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, host='mn-hdap03', port=8913)
+    # add your host and port
+    app.run_server(debug=True)
