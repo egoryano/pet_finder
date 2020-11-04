@@ -1,19 +1,16 @@
 import cv2
-import pandas as pd
-import numpy as np
 import os
 import numpy as np
+import pandas as pd
 from sklearn.neighbors import NearestNeighbors
-
-img_size = 256
-
 from keras.applications.densenet import preprocess_input, DenseNet121
-
 from keras.models import Model
 from keras.layers import GlobalAveragePooling2D, Input, Lambda, AveragePooling1D
 import keras.backend as K
-
 from tensorflow import keras
+
+
+img_size = 256
 
 
 def resize_to_square(im):
@@ -28,21 +25,21 @@ def resize_to_square(im):
     left, right = delta_w//2, delta_w-(delta_w//2)
     color = [0, 0, 0]
     new_im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT,value=color)
+
     return new_im
 
 def load_image(path, pet_id):
     image = cv2.imread(f'{path}{pet_id}-1.jpg')
     new_image = resize_to_square(image)
     new_image = preprocess_input(new_image)
+
     return new_image
 
 
 def load_emb_model(weights_path):
-
     inp = Input((256,256,3))
     backbone = DenseNet121(input_tensor = inp, include_top = False, weights=None)
     backbone.load_weights(weights_path)
-
     x = backbone.output
     x = GlobalAveragePooling2D()(x)
     x = Lambda(lambda x: K.expand_dims(x,axis = -1))(x)
@@ -56,6 +53,7 @@ def load_image(path):
     image = cv2.imread(f'{path}')
     new_image = resize_to_square(image)
     new_image = preprocess_input(new_image)
+
     return new_image
 
 
@@ -86,11 +84,8 @@ def get_closest_img_names(filtered_img_names,
     print(filtered_img_names)
     train_embs = get_embeddings(emb_model, filtered_img_names, img_path)
     search_img_emb = get_embeddings(emb_model, [search_img_name], search_path)
-
     closest_ids = get_nearest_ids(train_embs, search_img_emb)
-
     closest_pets_img_names = np.array(filtered_img_names)[closest_ids][0]
-
     # remove extension
     closest_pets_card_names = set([name.split('.')[0] for name in closest_pets_img_names])
     
